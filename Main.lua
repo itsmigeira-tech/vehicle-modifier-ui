@@ -8,20 +8,34 @@ local player = Players.LocalPlayer
 
 local Config = {
     Enabled = true,
-    Acceleration = 60,
-    Deceleration = 4
+    Acceleration = 6, -- 1 to 10
+    Deceleration = 4  -- 1 to 10
 }
 
--- Vehicle Modifier Core Loop
-RunService.Heartbeat:Connect(function(dt)
+-- Fixed & Responsive Vehicle Core Loop
+RunService.Stepped:Connect(function(t, dt)
     if not Config.Enabled then return end
     local char = player.Character
-    local seat = char and char:FindFirstChildOfClass("Humanoid") and char.Humanoid.SeatPart
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local seat = hum and hum.SeatPart
+
     if seat and seat:IsA("VehicleSeat") then
-        if seat.Throttle > 0 then
-            seat.AssemblyLinearVelocity += seat.CFrame.LookVector * (Config.Acceleration * dt)
-        elseif seat.Throttle < 0 then
-            seat.AssemblyLinearVelocity = seat.AssemblyLinearVelocity:Lerp(Vector3.zero, math.clamp(Config.Deceleration * dt, 0, 1))
+        pcall(function()
+            seat.MaxSpeed = 99999
+        end)
+        
+        local accelRate = Config.Acceleration * 25
+        local decelRate = Config.Deceleration * 0.15
+        
+        local throttle = seat.Throttle
+        if throttle == 0 and seat.ThrottleFloat then
+            throttle = seat.ThrottleFloat
+        end
+
+        if throttle > 0 then
+            seat.AssemblyLinearVelocity += (seat.CFrame.LookVector * (accelRate * dt))
+        elseif throttle < 0 then
+            seat.AssemblyLinearVelocity = seat.AssemblyLinearVelocity:Lerp(Vector3.zero, math.clamp(decelRate * dt * 10, 0, 1))
         end
     end
 end)
@@ -34,8 +48,8 @@ pcall(function() Gui.Parent = CoreGui end)
 if not Gui.Parent then Gui.Parent = player:WaitForChild("PlayerGui") end
 
 local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 230, 0, 175)
-Main.Position = UDim2.new(0.5, -115, 0.4, -87)
+Main.Size = UDim2.new(0, 240, 0, 195)
+Main.Position = UDim2.new(0.5, -120, 0.4, -97)
 Main.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
 Main.BorderSizePixel = 0
 Main.ClipsDescendants = true
@@ -80,7 +94,7 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 Title.Parent = Header
 
--- Sharp Vector Minimize Button (NO STROKE / OUTLINE)
+-- Minimize Button
 local MinBtn = Instance.new("TextButton")
 MinBtn.Size = UDim2.new(0, 24, 0, 24)
 MinBtn.Position = UDim2.new(1, -30, 0.5, -12)
@@ -93,7 +107,6 @@ MinBtn.Parent = Header
 
 Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 6)
 
--- Vector Minus & Plus Icon Lines
 local MinusLine = Instance.new("Frame")
 MinusLine.Size = UDim2.new(0, 10, 0, 2)
 MinusLine.Position = UDim2.new(0.5, -5, 0.5, -1)
@@ -111,7 +124,7 @@ PlusLine.Visible = false
 PlusLine.Parent = MinBtn
 Instance.new("UICorner", PlusLine).CornerRadius = UDim.new(1, 0)
 
--- Dragging Functionality
+-- Dragging Logic
 local dragging, dragInput, dragStart, startPos
 Header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -144,7 +157,7 @@ Content.Parent = Main
 
 local Layout = Instance.new("UIListLayout")
 Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.Padding = UDim.new(0, 6)
+Layout.Padding = UDim.new(0, 8)
 Layout.Parent = Content
 
 -- Minimize Toggle Logic
@@ -152,12 +165,12 @@ local minimized = false
 MinBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
     PlusLine.Visible = minimized
-    local targetSize = minimized and UDim2.new(0, 230, 0, 36) or UDim2.new(0, 230, 0, 175)
+    local targetSize = minimized and UDim2.new(0, 240, 0, 36) or UDim2.new(0, 240, 0, 195)
     Content.Visible = not minimized
     TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = targetSize}):Play()
 end)
 
--- Element Generators
+-- Toggle Generator
 local function createToggle(name, default, callback)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, 0, 0, 36)
@@ -209,9 +222,10 @@ local function createToggle(name, default, callback)
     end)
 end
 
-local function createInput(name, default, callback)
+-- Slider Generator (1 to 10)
+local function createSlider(name, minVal, maxVal, defaultVal, callback)
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, 0, 0, 36)
+    Frame.Size = UDim2.new(1, 0, 0, 48)
     Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Frame.BackgroundTransparency = 0.96
     Frame.BorderSizePixel = 0
@@ -220,8 +234,8 @@ local function createInput(name, default, callback)
     Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
 
     local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(0.55, 0, 1, 0)
-    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.Size = UDim2.new(0.6, 0, 0, 20)
+    Label.Position = UDim2.new(0, 10, 0, 4)
     Label.Text = name
     Label.Font = Enum.Font.GothamMedium
     Label.TextSize = 12
@@ -231,31 +245,76 @@ local function createInput(name, default, callback)
     Label.BackgroundTransparency = 1
     Label.Parent = Frame
 
-    local Box = Instance.new("TextBox")
-    Box.Size = UDim2.new(0, 56, 0, 22)
-    Box.Position = UDim2.new(1, -64, 0.5, -11)
-    Box.BackgroundColor3 = Color3.fromRGB(32, 35, 46)
-    Box.BorderSizePixel = 0
-    Box.Text = tostring(default)
-    Box.Font = Enum.Font.GothamBold
-    Box.TextSize = 13
-    Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Box.TextStrokeTransparency = 1
-    Box.ClearTextOnFocus = false
-    Box.Parent = Frame
+    local ValueLabel = Instance.new("TextLabel")
+    ValueLabel.Size = UDim2.new(0.3, 0, 0, 20)
+    ValueLabel.Position = UDim2.new(1, -40, 0, 4)
+    ValueLabel.Text = tostring(defaultVal)
+    ValueLabel.Font = Enum.Font.GothamBold
+    ValueLabel.TextSize = 12
+    ValueLabel.TextColor3 = Color3.fromRGB(0, 220, 130)
+    ValueLabel.TextStrokeTransparency = 1
+    ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    ValueLabel.BackgroundTransparency = 1
+    ValueLabel.Parent = Frame
 
-    Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 6)
+    local Track = Instance.new("TextButton")
+    Track.Size = UDim2.new(1, -20, 0, 8)
+    Track.Position = UDim2.new(0, 10, 0, 30)
+    Track.BackgroundColor3 = Color3.fromRGB(35, 38, 50)
+    Track.BorderSizePixel = 0
+    Track.Text = ""
+    Track.AutoButtonColor = false
+    Track.Parent = Frame
 
-    Box.FocusLost:Connect(function()
-        local val = tonumber(Box.Text)
-        if val then
-            callback(val)
-        else
-            Box.Text = tostring(default)
+    Instance.new("UICorner", Track).CornerRadius = UDim.new(1, 0)
+
+    local Fill = Instance.new("Frame")
+    local startRatio = (defaultVal - minVal) / (maxVal - minVal)
+    Fill.Size = UDim2.new(startRatio, 0, 1, 0)
+    Fill.BackgroundColor3 = Color3.fromRGB(0, 220, 130)
+    Fill.BorderSizePixel = 0
+    Fill.Parent = Track
+
+    Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
+
+    local SliderGradient = Instance.new("UIGradient")
+    SliderGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 220, 130)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 170, 255))
+    })
+    SliderGradient.Parent = Fill
+
+    local isDragging = false
+    local function update(input)
+        local pos = input.Position.X - Track.AbsolutePosition.X
+        local ratio = math.clamp(pos / Track.AbsoluteSize.X, 0, 1)
+        local val = math.round(minVal + ratio * (maxVal - minVal))
+        
+        Fill.Size = UDim2.new((val - minVal) / (maxVal - minVal), 0, 1, 0)
+        ValueLabel.Text = tostring(val)
+        callback(val)
+    end
+
+    Track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isDragging = true
+            update(input)
+        end
+    end)
+
+    Track.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isDragging = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            update(input)
         end
     end)
 end
 
 createToggle("Enabled", Config.Enabled, function(v) Config.Enabled = v end)
-createInput("Acceleration", Config.Acceleration, function(v) Config.Acceleration = v end)
-createInput("Deceleration", Config.Deceleration, function(v) Config.Deceleration = v end)
+createSlider("Acceleration", 1, 10, Config.Acceleration, function(v) Config.Acceleration = v end)
+createSlider("Deceleration", 1, 10, Config.Deceleration, function(v) Config.Deceleration = v end)
