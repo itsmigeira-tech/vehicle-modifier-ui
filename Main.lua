@@ -80,20 +80,18 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 Title.Parent = Header
 
--- Sharp Vector Minimize Button
+-- Sharp Vector Minimize Button (NO STROKE / OUTLINE)
 local MinBtn = Instance.new("TextButton")
 MinBtn.Size = UDim2.new(0, 24, 0, 24)
 MinBtn.Position = UDim2.new(1, -30, 0.5, -12)
 MinBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MinBtn.BackgroundTransparency = 0.94
+MinBtn.BorderSizePixel = 0
 MinBtn.Text = ""
 MinBtn.AutoButtonColor = false
 MinBtn.Parent = Header
 
 Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 6)
-local MinStroke = Instance.new("UIStroke", MinBtn)
-MinStroke.Color = Color3.fromRGB(255, 255, 255)
-MinStroke.Transparency = 0.88
 
 -- Vector Minus & Plus Icon Lines
 local MinusLine = Instance.new("Frame")
@@ -165,12 +163,10 @@ local function createToggle(name, default, callback)
     Frame.Size = UDim2.new(1, 0, 0, 36)
     Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Frame.BackgroundTransparency = 0.96
+    Frame.BorderSizePixel = 0
     Frame.Parent = Content
 
     Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
-    local Stroke = Instance.new("UIStroke", Frame)
-    Stroke.Color = Color3.fromRGB(255, 255, 255)
-    Stroke.Transparency = 0.92
 
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(0.6, 0, 1, 0)
@@ -188,6 +184,7 @@ local function createToggle(name, default, callback)
     Btn.Size = UDim2.new(0, 40, 0, 18)
     Btn.Position = UDim2.new(1, -48, 0.5, -9)
     Btn.BackgroundColor3 = default and Color3.fromRGB(0, 220, 130) or Color3.fromRGB(55, 58, 70)
+    Btn.BorderSizePixel = 0
     Btn.Text = ""
     Btn.AutoButtonColor = false
     Btn.Parent = Frame
@@ -198,6 +195,7 @@ local function createToggle(name, default, callback)
     Dot.Size = UDim2.new(0, 14, 0, 14)
     Dot.Position = default and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
     Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Dot.BorderSizePixel = 0
     Dot.Parent = Btn
 
     Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
@@ -216,12 +214,10 @@ local function createInput(name, default, callback)
     Frame.Size = UDim2.new(1, 0, 0, 36)
     Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Frame.BackgroundTransparency = 0.96
+    Frame.BorderSizePixel = 0
     Frame.Parent = Content
 
     Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
-    local Stroke = Instance.new("UIStroke", Frame)
-    Stroke.Color = Color3.fromRGB(255, 255, 255)
-    Stroke.Transparency = 0.92
 
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(0.55, 0, 1, 0)
@@ -239,6 +235,7 @@ local function createInput(name, default, callback)
     Box.Size = UDim2.new(0, 56, 0, 22)
     Box.Position = UDim2.new(1, -64, 0.5, -11)
     Box.BackgroundColor3 = Color3.fromRGB(32, 35, 46)
+    Box.BorderSizePixel = 0
     Box.Text = tostring(default)
     Box.Font = Enum.Font.GothamBold
     Box.TextSize = 13
@@ -248,9 +245,6 @@ local function createInput(name, default, callback)
     Box.Parent = Frame
 
     Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 6)
-    local BoxStroke = Instance.new("UIStroke", Box)
-    BoxStroke.Color = Color3.fromRGB(255, 255, 255)
-    BoxStroke.Transparency = 0.85
 
     Box.FocusLost:Connect(function()
         local val = tonumber(Box.Text)
