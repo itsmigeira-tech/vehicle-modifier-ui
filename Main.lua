@@ -64,40 +64,54 @@ MainGradient.Parent = Main
 
 -- Header Frame
 local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 34)
+Header.Size = UDim2.new(1, 0, 0, 36)
 Header.BackgroundTransparency = 1
 Header.Parent = Main
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -50, 1, 0)
-Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Position = UDim2.new(0, 14, 0, 0)
 Title.Text = "Vehicle Modifier"
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 11
+Title.TextSize = 13
 Title.TextColor3 = Color3.fromRGB(240, 240, 250)
 Title.TextStrokeTransparency = 1
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 Title.Parent = Header
 
--- Minimize Button
+-- Sharp Vector Minimize Button
 local MinBtn = Instance.new("TextButton")
-MinBtn.Size = UDim2.new(0, 22, 0, 22)
-MinBtn.Position = UDim2.new(1, -28, 0.5, -11)
+MinBtn.Size = UDim2.new(0, 24, 0, 24)
+MinBtn.Position = UDim2.new(1, -30, 0.5, -12)
 MinBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-MinBtn.BackgroundTransparency = 0.95
-MinBtn.Text = "-"
-MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 14
-MinBtn.TextColor3 = Color3.fromRGB(200, 200, 210)
-MinBtn.TextStrokeTransparency = 1
+MinBtn.BackgroundTransparency = 0.94
+MinBtn.Text = ""
 MinBtn.AutoButtonColor = false
 MinBtn.Parent = Header
 
 Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 6)
 local MinStroke = Instance.new("UIStroke", MinBtn)
 MinStroke.Color = Color3.fromRGB(255, 255, 255)
-MinStroke.Transparency = 0.9
+MinStroke.Transparency = 0.88
+
+-- Vector Minus & Plus Icon Lines
+local MinusLine = Instance.new("Frame")
+MinusLine.Size = UDim2.new(0, 10, 0, 2)
+MinusLine.Position = UDim2.new(0.5, -5, 0.5, -1)
+MinusLine.BackgroundColor3 = Color3.fromRGB(220, 225, 235)
+MinusLine.BorderSizePixel = 0
+MinusLine.Parent = MinBtn
+Instance.new("UICorner", MinusLine).CornerRadius = UDim.new(1, 0)
+
+local PlusLine = Instance.new("Frame")
+PlusLine.Size = UDim2.new(0, 2, 0, 10)
+PlusLine.Position = UDim2.new(0.5, -1, 0.5, -5)
+PlusLine.BackgroundColor3 = Color3.fromRGB(220, 225, 235)
+PlusLine.BorderSizePixel = 0
+PlusLine.Visible = false
+PlusLine.Parent = MinBtn
+Instance.new("UICorner", PlusLine).CornerRadius = UDim.new(1, 0)
 
 -- Dragging Functionality
 local dragging, dragInput, dragStart, startPos
@@ -125,8 +139,8 @@ end)
 
 -- Layout Container
 local Content = Instance.new("Frame")
-Content.Size = UDim2.new(1, -20, 1, -40)
-Content.Position = UDim2.new(0, 10, 0, 34)
+Content.Size = UDim2.new(1, -20, 1, -42)
+Content.Position = UDim2.new(0, 10, 0, 36)
 Content.BackgroundTransparency = 1
 Content.Parent = Main
 
@@ -139,8 +153,8 @@ Layout.Parent = Content
 local minimized = false
 MinBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
-    MinBtn.Text = minimized and "+" or "-"
-    local targetSize = minimized and UDim2.new(0, 230, 0, 34) or UDim2.new(0, 230, 0, 175)
+    PlusLine.Visible = minimized
+    local targetSize = minimized and UDim2.new(0, 230, 0, 36) or UDim2.new(0, 230, 0, 175)
     Content.Visible = not minimized
     TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = targetSize}):Play()
 end)
@@ -163,7 +177,7 @@ local function createToggle(name, default, callback)
     Label.Position = UDim2.new(0, 10, 0, 0)
     Label.Text = name
     Label.Font = Enum.Font.GothamMedium
-    Label.TextSize = 11
+    Label.TextSize = 12
     Label.TextColor3 = Color3.fromRGB(210, 210, 220)
     Label.TextStrokeTransparency = 1
     Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -214,7 +228,7 @@ local function createInput(name, default, callback)
     Label.Position = UDim2.new(0, 10, 0, 0)
     Label.Text = name
     Label.Font = Enum.Font.GothamMedium
-    Label.TextSize = 11
+    Label.TextSize = 12
     Label.TextColor3 = Color3.fromRGB(210, 210, 220)
     Label.TextStrokeTransparency = 1
     Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -222,14 +236,15 @@ local function createInput(name, default, callback)
     Label.Parent = Frame
 
     local Box = Instance.new("TextBox")
-    Box.Size = UDim2.new(0, 54, 0, 20)
-    Box.Position = UDim2.new(1, -62, 0.5, -10)
+    Box.Size = UDim2.new(0, 56, 0, 22)
+    Box.Position = UDim2.new(1, -64, 0.5, -11)
     Box.BackgroundColor3 = Color3.fromRGB(32, 35, 46)
     Box.Text = tostring(default)
     Box.Font = Enum.Font.GothamBold
-    Box.TextSize = 11
+    Box.TextSize = 13
     Box.TextColor3 = Color3.fromRGB(255, 255, 255)
     Box.TextStrokeTransparency = 1
+    Box.ClearTextOnFocus = false
     Box.Parent = Frame
 
     Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 6)
